@@ -6,7 +6,9 @@ public class Minecraft4K extends Frame implements Runnable {
    private int[] M = new int[32767];
    int[] blockData = new int[262144];
    int[] textureData = new int[12288];
-   Random localRandom = new Random();
+   int[] pixels;
+   Random random = new Random();
+   int width = 214, height = 120;
 
 
 
@@ -19,70 +21,83 @@ public class Minecraft4K extends Frame implements Runnable {
     }
 
     public void GenerateWorld(){
-        localRandom.setSeed(18295169L);
+        random.setSeed(18295169L);
         for (int i = 0; i < 262144; i++) {
-            blockData[i] = ((i / 64 % 64 > 32 + localRandom.nextInt(8)) ? (localRandom.nextInt(8) + 1) : 0);
+            blockData[i] = ((i / 64 % 64 > 32 + random.nextInt(8)) ? (random.nextInt(8) + 1) : 0);
         }
     }
 
     public void GenerateTextures(){
-        for (int j = 1; j < 16; j++) {
-            int k = 255 - localRandom.nextInt(96);
-            for (int m = 0; m < 48; m++) {
-                for (int n = 0; n < 16; n++) {
-                    int i2 = 9858122;
-                    if (j == 4) {
-                        i2 = 8355711;
+        for (int i = 1; i < 16; i++) {
+            int br = 255 - random.nextInt(96);
+            for (int y = 0; y < 48; y++) {
+                for (int x = 0; x < 16; x++) {
+                    int color = 0x966C4A;
+
+                    if (i == 4) {
+                        color = 0x7F7F7F;
                     }
-                    if (j != 4 || localRandom.nextInt(3) == 0) {
-                        k = 255 - localRandom.nextInt(96);
+
+                    if (i != 4 || random.nextInt(3) == 0) {
+                        br = 255 - random.nextInt(96);
                     }
-                    if (j == 1 && m < (n * n * 3 + n * 81 >> 2 & 0x3) + 18) {
-                        i2 = 6990400;
+
+                    if (i == 1 && y < (x * x * 3 + x * 81 >> 2 & 0x3) + 18) {
+                        color = 0x6AAA40;
                     }
-                    else if (j == 1 && m < (n * n * 3 + n * 81 >> 2 & 0x3) + 19) {
-                        k = k * 2 / 3;
+                    else if (i == 1 && y < (x * x * 3 + x * 81 >> 2 & 0x3) + 19) {
+                        br = br * 2 / 3;
                     }
-                    if (j == 7) {
-                        i2 = 6771249;
-                        if (n > 0 && n < 15 && ((m > 0 && m < 15) || (m > 32 && m < 47))) {
-                            i2 = 12359778;
-                            int i3 = n - 7;
-                            int i4 = (m & 0xF) - 7;
-                            if (i3 < 0) {
-                                i3 = 1 - i3;
+
+                    if (i == 7) {
+                        color = 0x675231;
+                        if (x > 0 && x < 15 && ((y > 0 && y < 15) || (y > 32 && y < 47))) {
+                            color = 0xBC9862;
+                            int xd = x - 7;
+                            int yd = (y & 0xF) - 7;
+                            if (xd < 0) {
+                                xd = 1 - xd;
                             }
-                            if (i4 < 0) {
-                                i4 = 1 - i4;
+                            if (yd < 0) {
+                                yd = 1 - yd;
                             }
-                            if (i4 > i3) {
-                                i3 = i4;
+                            if (yd > xd) {
+                                xd = yd;
                             }
-                            k = 196 - localRandom.nextInt(32) + i3 % 3 * 32;
+                            br = 196 - random.nextInt(32) + xd % 3 * 32;
                         }
-                        else if (localRandom.nextInt(2) == 0) {
-                            k = k * (150 - (n & 0x1) * 100) / 100;
-                        }
-                    }
-                    if (j == 5) {
-                        i2 = 11876885;
-                        if ((n + m / 4 * 4) % 8 == 0 || m % 4 == 0) {
-                            i2 = 12365733;
+                        else if (random.nextInt(2) == 0) {
+                            br = br * (150 - (x & 0x1) * 100) / 100;
                         }
                     }
-                    int i3 = k;
-                    if (m >= 32) {
-                        i3 /= 2;
-                    }
-                    if (j == 8) {
-                        i2 = 5298487;
-                        if (localRandom.nextInt(2) == 0) {
-                            i2 = 0;
-                            i3 = 255;
+
+                    if (i == 5) {
+                        color = 0xB53A15;
+                        if ((x + y / 4 * 4) % 8 == 0 || y % 4 == 0) {
+                            color = 0xBCAFA5;
                         }
                     }
-                    int i4 = (i2 >> 16 & 0xFF) * i3 / 255 << 16 | (i2 >> 8 & 0xFF) * i3 / 255 << 8 | (i2 & 0xFF) * i3 / 255;
-                    textureData[n + m * 16 + j * 256 * 3] = i4;
+
+                    int brr = br;
+
+                    if (y >= 32) {
+                        brr /= 2;
+                    }
+
+                    if (i == 8) {
+                        color = 5298487;
+                        if (random.nextInt(2) == 0) {
+                            color = 0;
+                            brr = 255;
+                        }
+                    }
+
+                    int r = (color >> 16 & 0xFF) * brr / 255;
+                    int g = (color >> 8 & 0xFF) * brr / 255;
+                    int b = (color & 0xFF) * brr / 255;
+                    int pixelColor = r << 16 | g << 8 | b;
+
+                    textureData[x + y * 16 + i * 256 * 3] = pixelColor;
                 }
              }
           }
@@ -93,77 +108,79 @@ public class Minecraft4K extends Frame implements Runnable {
    @Override
    public void run() {
       try {
-          BufferedImage image = new BufferedImage(214, 120, 1);
-          int[] pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+          BufferedImage image = new BufferedImage(width, height, 1);
+          pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 
           GenerateWorld();
           GenerateTextures();
 
-          float f1 = 96.5f;
-          float f2 = 65.0f;
-          float f3 = 96.5f;
+          float xPos = 96.5f;
+          float yPos = 65.0f;
+          float zPos = 96.5f;
           float f4 = 0.0f;
           float f5 = 0.0f;
           float f6 = 0.0f;
           long currentTimeMilliseconds = System.currentTimeMillis();
           int i5 = -1;
           int i6 = 0;
-          float f7 = 0.0f;
-          float f8 = 0.0f;
+          float xRot = 0.0f;
+          float yRot = 0.0f;
 
           while (true) {
-              final float f9 = (float)Math.sin(f7);
-              final float f10 = (float)Math.cos(f7);
-              final float f11 = (float)Math.sin(f8);
-              final float f12 = (float)Math.cos(f8);
+              final float xSin = (float)Math.sin(xRot);
+              final float xCos = (float)Math.cos(xRot);
+              final float ySin = (float)Math.sin(yRot);
+              final float yCos = (float)Math.cos(yRot);
 
           Label_1192:
               while (true) {
                   while (System.currentTimeMillis() - currentTimeMilliseconds > 10) {
                       if (this.M[2] > 0) {
-                          final float f13 = (this.M[2] - 428) / 214.0f * 2.0f;
-                          final float f14 = (this.M[3] - 240) / 120.0f * 2.0f;
-                          float f15 = (float)Math.sqrt(f13 * f13 + f14 * f14) - 1.2f;
-                          if (f15 < 0.0f) {
-                              f15 = 0.0f;
+                          float mouseXPos = (this.M[2] - 428) / 214.0f * 2.0f;
+                          float mouseYPos = (this.M[3] - 240) / 120.0f * 2.0f;
+                          float mouseDistance = (float)Math.sqrt(mouseXPos * mouseXPos + mouseYPos * mouseYPos) - 1.2f;
+
+                          System.out.println("Mouse position: (" + mouseXPos + ", " + mouseYPos + "), mouse distance: " + mouseDistance);
+
+                          if (mouseDistance < 0.0f) {
+                              mouseDistance = 0.0f;
                           }
-                          if (f15 > 0.0f) {
-                              f7 += f13 * f15 / 400.0f;
-                              f8 -= f14 * f15 / 400.0f;
-                              if (f8 < -1.57f) {
-                                  f8 = -1.57f;
+                          if (mouseDistance > 0.0f) {
+                              xRot += mouseXPos * mouseDistance / 400.0f;
+                              yRot -= mouseYPos * mouseDistance / 400.0f;
+                              if (yRot < -1.57f) {
+                                  yRot = -1.57f;
                               }
-                              if (f8 > 1.57f) {
-                                  f8 = 1.57f;
+                              if (yRot > 1.57f) {
+                                  yRot = 1.57f;
                               }
                           }
                       }
 
                       currentTimeMilliseconds += 10;
 
-                      float f13 = 0.0f;
-                      float f14 = 0.0f;
-                      f14 += (this.M[119] - this.M[115]) * 0.02f;
-                      f13 += (this.M[100] - this.M[97]) * 0.02f;
+                      float movementX = (this.M[100] - this.M[97]) * 0.02f; //checks for A/D keys
+                      float movementY = (this.M[119] - this.M[115]) * 0.02f; //checks for W/S keys
+
                       f4 *= 0.5f;
                       f5 *= 0.99f;
                       f6 *= 0.5f;
-                      f4 += f9 * f14 + f10 * f13;
-                      f6 += f10 * f14 - f9 * f13;
+                      f4 += xSin * movementY + xCos * movementX;
+                      f6 += xCos * movementY - xSin * movementX;
                       f5 += 0.003f;
 
-                      for (int i7 = 0; i7 < 3; i7++) {
-                          final float f16 = f1 + f4 * ((i7 + 0) % 3 / 2);
-                          final float f17 = f2 + f5 * ((i7 + 1) % 3 / 2);
-                          final float f18 = f3 + f6 * ((i7 + 2) % 3 / 2);
-                          int i8 = 0;
+                      for (int i = 0; i < 3; i++) {
+                          final float f16 = xPos + f4 * ((i + 0) % 3 / 2);
+                          final float f17 = yPos + f5 * ((i + 1) % 3 / 2);
+                          final float f18 = zPos + f6 * ((i + 2) % 3 / 2);
+                          int index = 0;
 
-                          while (i8 < 12) {
-                              final int i9 = (int)(f16 + (i8 >> 0 & 0x1) * 0.6f - 0.3f) - 64;
-                              final int i10 = (int)(f17 + ((i8 >> 2) - 1) * 0.8f + 0.65f) - 64;
-                              final int i11 = (int)(f18 + (i8 >> 1 & 0x1) * 0.6f - 0.3f) - 64;
+                          while (index < 12) {
+                              final int i9 = (int)(f16 + (index >> 0 & 0x1) * 0.6f - 0.3f) - 64;
+                              final int i10 = (int)(f17 + ((index >> 2) - 1) * 0.8f + 0.65f) - 64;
+                              final int i11 = (int)(f18 + (index >> 1 & 0x1) * 0.6f - 0.3f) - 64;
                               if (i9 < 0 || i10 < 0 || i11 < 0 || i9 >= 64 || i10 >= 64 || i11 >= 64 || blockData[i9 + i10 * 64 + i11 * 4096] > 0) {
-                                  if (i7 != 1) {
+                                  if (i != 1) {
                                       continue Label_1192;
                                   }
                                   if (this.M[32] > 0 && f5 > 0.0f) {
@@ -175,13 +192,13 @@ public class Minecraft4K extends Frame implements Runnable {
                                   continue Label_1192;
                               }
                               else {
-                                  i8++;
+                                  index++;
                               }
                           }
 
-                          f1 = f16;
-                          f2 = f17;
-                          f3 = f18;
+                          xPos = f16;
+                          yPos = f17;
+                          zPos = f18;
                       }
                   }
                   break;
@@ -200,74 +217,75 @@ public class Minecraft4K extends Frame implements Runnable {
               }
 
               for (int i14 = 0; i14 < 12; ++i14) {
-                  final int i15 = (int)(f1 + (i14 >> 0 & 0x1) * 0.6f - 0.3f) - 64;
-                  final int i16 = (int)(f2 + ((i14 >> 2) - 1) * 0.8f + 0.65f) - 64;
-                  final int i17 = (int)(f3 + (i14 >> 1 & 0x1) * 0.6f - 0.3f) - 64;
+                  final int i15 = (int)(xPos + (i14 >> 0 & 0x1) * 0.6f - 0.3f) - 64;
+                  final int i16 = (int)(yPos + ((i14 >> 2) - 1) * 0.8f + 0.65f) - 64;
+                  final int i17 = (int)(zPos + (i14 >> 1 & 0x1) * 0.6f - 0.3f) - 64;
                   if (i15 >= 0 && i16 >= 0 && i17 >= 0 && i15 < 64 && i16 < 64 && i17 < 64) {
                       blockData[i15 + i16 * 64 + i17 * 4096] = 0;
                   }
               }
 
               float i18 = -1.0f;
-              for (int i15 = 0; i15 < 214; i15++) {
-                  final float f19 = (i15 - 107) / 90.0f;
-                  for (int i17 = 0; i17 < 120; i17++) {
-                      final float f20 = (i17 - 60) / 90.0f;
-                      final float f21 = 1.0f;
-                      final float f22 = f21 * f12 + f20 * f11;
-                      final float f23 = f20 * f12 - f21 * f11;
-                      final float f24 = f19 * f10 + f22 * f9;
-                      final float f25 = f22 * f10 - f19 * f9;
-                      int i19 = 0;
-                      int i20 = 255;
-                      double d = 20.0;
+              for (int x = 0; x < 214; x++) {
+                  float ___xd = (x - 107) / 90.0f;
+                  for (int y = 0; y < 120; y++) {
+                      float __yd = (y - 60) / 90.0f;
+                      float __zd = 1.0f;
+
+                      float ___zd = __zd * yCos + __yd * ySin;
+                      float _yd = __yd * yCos - __zd * ySin;
+                      float _xd = ___xd * xCos + ___zd * xSin;
+                      float _zd = ___zd * xCos - ___xd * xSin;
+                      int col = 0;
+                      int br = 255;
+                      double closest = 20.0;
                       float f26 = 5.0f;
 
-                      for (int i21 = 0; i21 < 3; i21++) {
-                          float f27 = f24;
-                          if (i21 == 1) {
-                              f27 = f23;
+                      for (int d = 0; d < 3; d++) {
+                          float dimLength = _xd;
+                          if (d == 1) {
+                              dimLength = _yd;
                           }
-                          if (i21 == 2) {
-                              f27 = f25;
+                          if (d == 2) {
+                              dimLength = _zd;
                           }
-                          final float f28 = 1.0f / ((f27 < 0.0f) ? (-f27) : f27);
-                          final float f29 = f24 * f28;
-                          final float f30 = f23 * f28;
-                          final float f31 = f25 * f28;
-                          float f32 = f1 - (int)f1;
+                          float ll = 1.0f / ((dimLength < 0.0f) ? (-dimLength) : dimLength);
+                          float xd = _xd * ll;
+                          float yd = _yd * ll;
+                          float zd = _zd * ll;
+                          float f32 = xPos - (int)xPos;
 
-                          if (i21 == 1) {
-                              f32 = f2 - (int)f2;
+                          if (d == 1) {
+                              f32 = yPos - (int)yPos;
                           }
-                          if (i21 == 2) {
-                              f32 = f3 - (int)f3;
+                          if (d == 2) {
+                              f32 = zPos - (int)zPos;
                           }
-                          if (f27 > 0.0f) {
+                          if (dimLength > 0.0f) {
                               f32 = 1.0f - f32;
                           }
 
-                          float f33 = f28 * f32;
-                          float f34 = f1 + f29 * f32;
-                          float f35 = f2 + f30 * f32;
-                          float f36 = f3 + f31 * f32;
+                          float dist = ll * f32;
+                          float xp = xPos + xd * f32;
+                          float yp = yPos + yd * f32;
+                          float zp = zPos + zd * f32;
 
-                          if (f27 < 0.0f) {
-                              if (i21 == 0) {
-                                  f34--;
+                          if (dimLength < 0.0f) {
+                              if (d == 0) {
+                                  xp--;
                               }
-                              if (i21 == 1) {
-                                  f35--;
+                              if (d == 1) {
+                                  yp--;
                               }
-                              if (i21 == 2) {
-                                  f36--;
+                              if (d == 2) {
+                                  zp--;
                               }
                           }
 
-                          while (f33 < d) {
-                              final int i22 = (int)f34 - 64;
-                              final int i23 = (int)f35 - 64;
-                              final int i24 = (int)f36 - 64;
+                          while (dist < closest) {
+                              int i22 = (int)xp - 64;
+                              int i23 = (int)yp - 64;
+                              int i24 = (int)zp - 64;
 
                               if (i22 < 0 || i23 < 0 || i24 < 0 || i22 >= 64 || i23 >= 64) {
                                   break;
@@ -276,54 +294,54 @@ public class Minecraft4K extends Frame implements Runnable {
                                   break;
                               }
 
-                              final int i25 = i22 + i23 * 64 + i24 * 4096;
-                              final int i26 = blockData[i25];
+                              int i25 = i22 + i23 * 64 + i24 * 4096;
+                              int i26 = blockData[i25];
 
                               if (i26 > 0) {
-                                  i12 = ((int)((f34 + f36) * 16.0f) & 0xF);
-                                  i13 = ((int)(f35 * 16.0f) & 0xF) + 16;
+                                  i12 = ((int)((xp + zp) * 16.0f) & 0xF);
+                                  i13 = ((int)(yp * 16.0f) & 0xF) + 16;
 
-                                  if (i21 == 1) {
-                                      i12 = ((int)(f34 * 16.0f) & 0xF);
-                                      i13 = ((int)(f36 * 16.0f) & 0xF);
-                                      if (f30 < 0.0f) {
+                                  if (d == 1) {
+                                      i12 = ((int)(xp * 16.0f) & 0xF);
+                                      i13 = ((int)(zp * 16.0f) & 0xF);
+                                      if (yd < 0.0f) {
                                           i13 += 32;
                                       }
                                   }
 
-                                  int i27 = 16777215;
+                                  int cc = 0xFFFFFF;
 
                                   if (i25 != i5 || (i12 > 0 && i13 % 16 > 0 && i12 < 15 && i13 % 16 < 15)) {
-                                      i27 = textureData[i12 + i13 * 16 + i26 * 256 * 3];
+                                      cc = textureData[i12 + i13 * 16 + i26 * 256 * 3];
                                   }
 
-                                  if (f33 < f26 && i15 == this.M[2] / 4 && i17 == this.M[3] / 4) {
+                                  if (dist < f26 && x == this.M[2] / 4 && y == this.M[3] / 4) {
                                       i18 = (float)i25;
                                       i6 = 1;
-                                      if (f27 > 0.0f) {
+                                      if (dimLength > 0.0f) {
                                           i6 = -1;
                                       }
-                                      i6 <<= 6 * i21;
-                                      f26 = f33;
+                                      i6 <<= 6 * d;
+                                      f26 = dist;
                                   }
-                                  if (i27 > 0) {
-                                      i19 = i27;
-                                      i20 = 255 - (int)(f33 / 20.0f * 255.0f);
-                                      i20 = i20 * (255 - (i21 + 2) % 3 * 50) / 255;
-                                      d = f33;
+                                  if (cc > 0) {
+                                      col = cc;
+                                      br = 255 - (int)(dist / 20.0f * 255.0f);
+                                      br = br * (255 - (d + 2) % 3 * 50) / 255;
+                                      closest = dist;
                                   }
                               }
 
-                              f34 += f29;
-                              f35 += f30;
-                              f36 += f31;
-                              f33 += f28;
+                              xp += xd;
+                              yp += yd;
+                              zp += zd;
+                              dist += ll;
                           }
                       }
-                      int i21 = (i19 >> 16 & 0xFF) * i20 / 255;
-                      final int i28 = (i19 >> 8 & 0xFF) * i20 / 255;
-                      final int i29 = (i19 & 0xFF) * i20 / 255;
-                      pixels[i15 + i17 * 214] = (i21 << 16 | i28 << 8 | i29);
+                      int r = (col >> 16 & 0xFF) * br / 255;
+                      int g = (col >> 8 & 0xFF) * br / 255;
+                      int b = (col & 0xFF) * br / 255;
+                      pixels[x + y * 214] = (r << 16 | g << 8 | b);
                   }
               }
               i5 = (int)i18;
@@ -339,36 +357,37 @@ public class Minecraft4K extends Frame implements Runnable {
 
   
   @Override
-  public boolean handleEvent(final Event paramEvent) {
+  public boolean handleEvent(final Event event) {
       int i = 0;
-      switch (paramEvent.id) {
-          case 401: {
+      switch (event.id) {
+          case Event.KEY_PRESS: {
               i = 1;
           }
-          case 402: {
-              this.M[paramEvent.key] = i;
+          case Event.KEY_RELEASE: {
+              this.M[event.key] = i;
               break;
           }
-          case 501: {
+          case Event.MOUSE_DOWN: {
               i = 1;
-              this.M[2] = paramEvent.x;
-              this.M[3] = paramEvent.y;
+              this.M[2] = event.x;
+              this.M[3] = event.y;
+              System.out.println("a");
           }
-          case 502: {
-              if ((paramEvent.modifiers & 0x4) > 0) {
+          case Event.MOUSE_UP: {
+              if ((event.modifiers & 0x4) > 0) {
                   this.M[1] = i;
                   break;
               }
               this.M[0] = i;
               break;
           }
-          case 503:
-          case 506: {
-              this.M[2] = paramEvent.x;
-              this.M[3] = paramEvent.y;
+          case Event.MOUSE_MOVE:
+          case Event.MOUSE_DRAG: {
+              this.M[2] = event.x;
+              this.M[3] = event.y;
               break;
           }
-          case 505: {
+          case Event.MOUSE_EXIT: {
               this.M[2] = 0;
               break;
           }
