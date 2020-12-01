@@ -117,20 +117,20 @@ public class Minecraft4K extends Frame implements Runnable {
           float xPos = 96.5f;
           float yPos = 65.0f;
           float zPos = 96.5f;
-          float f4 = 0.0f;
-          float f5 = 0.0f;
-          float f6 = 0.0f;
+          float velocityX = 0.0f;
+          float velocityY = 0.0f;
+          float velocityZ = 0.0f;
           long currentTimeMilliseconds = System.currentTimeMillis();
-          int i5 = -1;
-          int i6 = 0;
+          int selectedBlockPosIndex = -1;
+          int placeBlockOffset = 0;
           float xRot = 0.0f;
           float yRot = 0.0f;
 
           while (true) {
-              final float xSin = (float)Math.sin(xRot);
-              final float xCos = (float)Math.cos(xRot);
-              final float ySin = (float)Math.sin(yRot);
-              final float yCos = (float)Math.cos(yRot);
+              float xSin = (float)Math.sin(xRot);
+              float xCos = (float)Math.cos(xRot);
+              float ySin = (float)Math.sin(yRot);
+              float yCos = (float)Math.cos(yRot);
 
           Label_1192:
               while (true) {
@@ -162,33 +162,33 @@ public class Minecraft4K extends Frame implements Runnable {
                       float movementX = (this.M[100] - this.M[97]) * 0.02f; //checks for A/D keys
                       float movementY = (this.M[119] - this.M[115]) * 0.02f; //checks for W/S keys
 
-                      f4 *= 0.5f;
-                      f5 *= 0.99f;
-                      f6 *= 0.5f;
-                      f4 += xSin * movementY + xCos * movementX;
-                      f6 += xCos * movementY - xSin * movementX;
-                      f5 += 0.003f;
+                      velocityX *= 0.5f;
+                      velocityY *= 0.99f;
+                      velocityZ *= 0.5f;
+                      velocityX += xSin * movementY + xCos * movementX;
+                      velocityZ += xCos * movementY - xSin * movementX;
+                      velocityY += 0.003f;
 
                       for (int i = 0; i < 3; i++) {
-                          final float f16 = xPos + f4 * ((i + 0) % 3 / 2);
-                          final float f17 = yPos + f5 * ((i + 1) % 3 / 2);
-                          final float f18 = zPos + f6 * ((i + 2) % 3 / 2);
+                          float newXPos = xPos + velocityX * ((i + 0) % 3 / 2);
+                          float newYPos = yPos + velocityY * ((i + 1) % 3 / 2);
+                          float newZPos = zPos + velocityZ * ((i + 2) % 3 / 2);
                           int index = 0;
 
                           while (index < 12) {
-                              final int i9 = (int)(f16 + (index >> 0 & 0x1) * 0.6f - 0.3f) - 64;
-                              final int i10 = (int)(f17 + ((index >> 2) - 1) * 0.8f + 0.65f) - 64;
-                              final int i11 = (int)(f18 + (index >> 1 & 0x1) * 0.6f - 0.3f) - 64;
-                              if (i9 < 0 || i10 < 0 || i11 < 0 || i9 >= 64 || i10 >= 64 || i11 >= 64 || blockData[i9 + i10 * 64 + i11 * 4096] > 0) {
+                              int blockX = (int)(newXPos + (index >> 0 & 0x1) * 0.6f - 0.3f) - 64;
+                              int blockY = (int)(newYPos + ((index >> 2) - 1) * 0.8f + 0.65f) - 64;
+                              int blockZ = (int)(newZPos + (index >> 1 & 0x1) * 0.6f - 0.3f) - 64;
+                              if (blockX < 0 || blockY < 0 || blockZ < 0 || blockX >= 64 || blockY >= 64 || blockZ >= 64 || blockData[blockX + blockY * 64 + blockZ * 4096] > 0) {
                                   if (i != 1) {
                                       continue Label_1192;
                                   }
-                                  if (this.M[32] > 0 && f5 > 0.0f) {
+                                  if (this.M[32] > 0 && velocityY > 0.0f) {
                                       this.M[32] = 0;
-                                      f5 = -0.1f;
+                                      velocityY = -0.1f;
                                       continue Label_1192;
                                   }
-                                  f5 = 0.0f;
+                                  velocityY = 0.0f;
                                   continue Label_1192;
                               }
                               else {
@@ -196,46 +196,47 @@ public class Minecraft4K extends Frame implements Runnable {
                               }
                           }
 
-                          xPos = f16;
-                          yPos = f17;
-                          zPos = f18;
+                          xPos = newXPos;
+                          yPos = newYPos;
+                          zPos = newZPos;
                       }
                   }
                   break;
               }
-              int i12 = 0;
-              int i13 = 0;
+              int uvX = 0;
+              int uvY = 0;
 
-              if (this.M[1] > 0 && i5 > 0) {
-                  blockData[i5] = 0;
+              if (this.M[1] > 0 && selectedBlockPosIndex > 0) {
+                  blockData[selectedBlockPosIndex] = 0;
                   this.M[1] = 0;
               }
 
-              if (this.M[0] > 0 && i5 > 0) {
-                  blockData[i5 + i6] = 1;
+              if (this.M[0] > 0 && selectedBlockPosIndex > 0) {
+                  blockData[selectedBlockPosIndex + placeBlockOffset] = 1;
                   this.M[0] = 0;
               }
 
-              for (int i14 = 0; i14 < 12; ++i14) {
-                  final int i15 = (int)(xPos + (i14 >> 0 & 0x1) * 0.6f - 0.3f) - 64;
-                  final int i16 = (int)(yPos + ((i14 >> 2) - 1) * 0.8f + 0.65f) - 64;
-                  final int i17 = (int)(zPos + (i14 >> 1 & 0x1) * 0.6f - 0.3f) - 64;
+              for (int i = 0; i < 12; ++i) {
+                  int i15 = (int)(xPos + (i >> 0 & 0x1) * 0.6f - 0.3f) - 64;
+                  int i16 = (int)(yPos + ((i >> 2) - 1) * 0.8f + 0.65f) - 64;
+                  int i17 = (int)(zPos + (i >> 1 & 0x1) * 0.6f - 0.3f) - 64;
                   if (i15 >= 0 && i16 >= 0 && i17 >= 0 && i15 < 64 && i16 < 64 && i17 < 64) {
                       blockData[i15 + i16 * 64 + i17 * 4096] = 0;
                   }
               }
 
-              float i18 = -1.0f;
+              int tempBlockPosIndex = -1;
               for (int x = 0; x < 214; x++) {
                   float ___xd = (x - 107) / 90.0f;
                   for (int y = 0; y < 120; y++) {
                       float __yd = (y - 60) / 90.0f;
                       float __zd = 1.0f;
-
+                      
                       float ___zd = __zd * yCos + __yd * ySin;
                       float _yd = __yd * yCos - __zd * ySin;
                       float _xd = ___xd * xCos + ___zd * xSin;
                       float _zd = ___zd * xCos - ___xd * xSin;
+
                       int col = 0;
                       int br = 255;
                       double closest = 20.0;
@@ -253,14 +254,11 @@ public class Minecraft4K extends Frame implements Runnable {
                           float xd = _xd * ll;
                           float yd = _yd * ll;
                           float zd = _zd * ll;
-                          float f32 = xPos - (int)xPos;
 
-                          if (d == 1) {
-                              f32 = yPos - (int)yPos;
-                          }
-                          if (d == 2) {
-                              f32 = zPos - (int)zPos;
-                          }
+                          float f32 = xPos - (int)xPos;
+                          if (d == 1) f32 = yPos - (int)yPos;
+                          if (d == 2)  f32 = zPos - (int)zPos;
+
                           if (dimLength > 0.0f) {
                               f32 = 1.0f - f32;
                           }
@@ -271,57 +269,49 @@ public class Minecraft4K extends Frame implements Runnable {
                           float zp = zPos + zd * f32;
 
                           if (dimLength < 0.0f) {
-                              if (d == 0) {
-                                  xp--;
-                              }
-                              if (d == 1) {
-                                  yp--;
-                              }
-                              if (d == 2) {
-                                  zp--;
-                              }
+                              if (d == 0) xp--;
+                              if (d == 1) yp--;
+                              if (d == 2) zp--;
                           }
 
                           while (dist < closest) {
-                              int i22 = (int)xp - 64;
-                              int i23 = (int)yp - 64;
-                              int i24 = (int)zp - 64;
+                              int blockX = (int)xp - 64;
+                              int blockY = (int)yp - 64;
+                              int blockZ = (int)zp - 64;
 
-                              if (i22 < 0 || i23 < 0 || i24 < 0 || i22 >= 64 || i23 >= 64) {
+                              if (blockX < 0 || blockY < 0 || blockZ < 0 || blockX >= 64 || blockY >= 64) {
                                   break;
                               }
-                              if (i24 >= 64) {
+                              if (blockZ >= 64) {
                                   break;
                               }
 
-                              int i25 = i22 + i23 * 64 + i24 * 4096;
-                              int i26 = blockData[i25];
+                              int blockPosIndex = blockX + blockY * 64 + blockZ * 4096;
+                              int blockType = blockData[blockPosIndex];
 
-                              if (i26 > 0) {
-                                  i12 = ((int)((xp + zp) * 16.0f) & 0xF);
-                                  i13 = ((int)(yp * 16.0f) & 0xF) + 16;
+                              if (blockType > 0) {
+                                  uvX = ((int)((xp + zp) * 16.0f) & 0xF);
+                                  uvY = ((int)(yp * 16.0f) & 0xF) + 16;
 
                                   if (d == 1) {
-                                      i12 = ((int)(xp * 16.0f) & 0xF);
-                                      i13 = ((int)(zp * 16.0f) & 0xF);
-                                      if (yd < 0.0f) {
-                                          i13 += 32;
-                                      }
+                                      uvX = ((int)(xp * 16.0f) & 0xF);
+                                      uvY = ((int)(zp * 16.0f) & 0xF);
+                                      if (yd < 0.0f) uvY += 32;
                                   }
 
                                   int cc = 0xFFFFFF;
 
-                                  if (i25 != i5 || (i12 > 0 && i13 % 16 > 0 && i12 < 15 && i13 % 16 < 15)) {
-                                      cc = textureData[i12 + i13 * 16 + i26 * 256 * 3];
+                                  if (blockPosIndex != selectedBlockPosIndex || (uvX > 0 && uvY % 16 > 0 && uvX < 15 && uvY % 16 < 15)) {
+                                      cc = textureData[uvX + uvY * 16 + blockType * 256 * 3];
                                   }
 
                                   if (dist < f26 && x == this.M[2] / 4 && y == this.M[3] / 4) {
-                                      i18 = (float)i25;
-                                      i6 = 1;
+                                      tempBlockPosIndex = blockPosIndex;
+                                      placeBlockOffset = 1;
                                       if (dimLength > 0.0f) {
-                                          i6 = -1;
+                                          placeBlockOffset = -1;
                                       }
-                                      i6 <<= 6 * d;
+                                      placeBlockOffset <<= 6 * d;
                                       f26 = dist;
                                   }
                                   if (cc > 0) {
@@ -344,7 +334,7 @@ public class Minecraft4K extends Frame implements Runnable {
                       pixels[x + y * 214] = (r << 16 | g << 8 | b);
                   }
               }
-              i5 = (int)i18;
+              selectedBlockPosIndex = tempBlockPosIndex;
               Thread.sleep(2L);
               if (!this.isActive()) break;
               this.getGraphics().drawImage(image, 0, 0, 856, 480, (ImageObserver)null);
